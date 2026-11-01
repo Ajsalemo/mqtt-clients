@@ -1,24 +1,15 @@
+import Fastify from 'fastify';
 import { connectAsync } from "mqtt";
+import { asyncPublish } from './pub/publish.js';
+import { subMessages } from './sub/messages.js';
+import { subscribeAsync } from './sub/subscribe.js';
 
-const MOSQUITTO_BROKER_URL = "mqtt://localhost:1883";
-
-const subscribeAsync = async(client) => {
-    try {
-        if (!client) {
-            console.error("No connection to broker");
-            return;
-        }
-        console.log("Subscribing to topic [test]");
-        const subscribe = await client.subscribeAsync("test");
-        // Iterate over topics being subscribed to
-        // in this case, its just one (1)
-        subscribe.forEach((topic) => {
-            console.log(`Subscribed to topic [${topic.topic}]`);
-        });
-    } catch (error) {
-        console.error("Failed to subscribe to topic:", error);
-    }
-}
+const fastify = Fastify({
+    logger: true
+})
+const MOSQUITTO_BROKER_URL = process.env.MQTT_BROKER_URL || "mqtt://localhost:1883";
+const PORT = process.env.PORT || 3000;
+const TOPIC = process.env.TOPIC || "test";
 
 const connectBroker = async () => {
     try {
@@ -29,43 +20,33 @@ const connectBroker = async () => {
             client.end();
         });
         // After connecting, subscribe to topics
-        await subscribeAsync(client);
+        await subscribeAsync(client, TOPIC);
 
         return client;
     } catch (error) {
         console.error("Failed to connect to mosquitto broker", error);
-    }   
-}
-
-// Singleton connection to the mosquitto broker
-const conn = await connectBroker();
-
-const asyncPublish = async() => {
-    try {
-        if (!conn) {
-            console.error("No connection to broker");
-            return;
-        }
-        console.log("Publishing to topic [test] with message: 'Hello MQTT'")
-        await conn.publishAsync("test", "Hello MQTT");
-    } catch (error) {
-        console.error("Failed to publish message:", error);
     }
 }
 
-const subMessages = async () => {
+const start = async () => {
     try {
+        const address = await fastify.listen({ port: PORT });
+        console.log(`Fastify listening at ${address}`);
+
+        // Singleton connection to the mosquitto broker
+        const conn = await connectBroker();
+        // Check at startup if connection to the broker is successful
         if (!conn) {
             console.error("No connection to broker");
-            return;
+            process.exit(1)
         }
-        conn.on("message", async (topic, message) => {
-            console.log(`Received message on topic [${topic}]: ${message.toString()}`);
-        });
-    } catch (error) {
-        console.error("Failed to handle incoming messages:", error);
+
+        await asyncPublish(conn, TOPIC);
+        await subMessages(conn);
+    } catch (err) {
+        fastify.log.error(err);
+        process.exit(1);
     }
 }
 
-await asyncPublish();
-await subMessages();
+start(); 

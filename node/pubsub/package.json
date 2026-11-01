@@ -1,5 +1,6 @@
 {
   "dependencies": {
+    "fastify": "^5.12.7",
     "mqtt": "^5.16.1"
   },
   "type": "module"
