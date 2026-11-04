@@ -1,6 +1,6 @@
 import Fastify from 'fastify';
 import { connectAsync } from "mqtt";
-import { asyncPublish } from './pub/publish.js';
+import { routes } from './plugins/routes.js';
 import { subMessages } from './sub/messages.js';
 import { subscribeAsync } from './sub/subscribe.js';
 
@@ -9,7 +9,9 @@ const fastify = Fastify({
 })
 const MOSQUITTO_BROKER_URL = process.env.MQTT_BROKER_URL || "mqtt://localhost:1883";
 const PORT = process.env.PORT || 3000;
-const TOPIC = process.env.TOPIC || "test";
+export const TOPIC = process.env.TOPIC || "test";
+// Register all controller routes
+fastify.register(routes)
 
 const connectBroker = async () => {
     try {
@@ -28,20 +30,20 @@ const connectBroker = async () => {
     }
 }
 
+export const conn = await connectBroker();
+
 const start = async () => {
     try {
         const address = await fastify.listen({ port: PORT });
         console.log(`Fastify listening at ${address}`);
 
         // Singleton connection to the mosquitto broker
-        const conn = await connectBroker();
         // Check at startup if connection to the broker is successful
         if (!conn) {
             console.error("No connection to broker");
             process.exit(1)
         }
-
-        await asyncPublish(conn, TOPIC);
+            // Listen for incoming messages on the subscribed topic
         await subMessages(conn);
     } catch (err) {
         fastify.log.error(err);
