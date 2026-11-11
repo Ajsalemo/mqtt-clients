@@ -16,14 +16,22 @@ fastify.register(routes)
 const connectBroker = async () => {
     try {
         console.log(`Connecting to mosquitto broker at ${MOSQUITTO_BROKER_URL}`);
-        const client = await connectAsync(MOSQUITTO_BROKER_URL);
+        // Wait 10 seconds between each reconnect attempt
+        // reconnect on connection loss
+        const opts = {
+            reconnectPeriod: 10000,
+            reconnectOnConnackError: true,
+        }
+        
+        const client = await connectAsync(MOSQUITTO_BROKER_URL, opts);
         client.on("error", (error) => {
             console.error("Connection error:", error);
-            client.end();
+            console.warn("Attempting to reconnect to mosquitto broker");
         });
+
         // After connecting, subscribe to topics
         await subscribeAsync(client, TOPIC);
-
+        console.log(`Connected to mosquitto broker at ${MOSQUITTO_BROKER_URL}`);
         return client;
     } catch (error) {
         console.error("Failed to connect to mosquitto broker", error);
@@ -36,14 +44,13 @@ const start = async () => {
     try {
         const address = await fastify.listen({ port: PORT });
         console.log(`Fastify listening at ${address}`);
-
         // Singleton connection to the mosquitto broker
         // Check at startup if connection to the broker is successful
         if (!conn) {
             console.error("No connection to broker");
-            process.exit(1)
+            throw new Error("No connection to broker");
         }
-            // Listen for incoming messages on the subscribed topic
+        // Listen for incoming messages on the subscribed topic
         await subMessages(conn);
     } catch (err) {
         fastify.log.error(err);
