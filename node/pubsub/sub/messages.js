@@ -2,7 +2,7 @@ export const subMessages = async (conn) => {
     try {
         if (!conn) {
             console.error("No connection to broker");
-            return;
+            throw new Error("No connection to broker");
         }
         conn.on("message", async (topic, message) => {
             console.log(`Received message on topic [${topic}]: ${message.toString()}`);

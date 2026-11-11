@@ -2,7 +2,7 @@ export const subscribeAsync = async (client, TOPIC) => {
     try {
         if (!client) {
             console.error("No connection to broker");
-            return;
+            throw new Error("No connection to broker");
         }
         console.log(`Subscribing to topic [${TOPIC}]`);
         const subscribe = await client.subscribeAsync(TOPIC);
