@@ -8,7 +8,7 @@ const fastify = Fastify({
     logger: true
 })
 const MOSQUITTO_BROKER_URL = process.env.MQTT_BROKER_URL || "mqtt://localhost:1883";
-const PORT = process.env.PORT || 3001;
+const PORT = process.env.PORT || 3000;
 export const TOPIC = process.env.TOPIC || "test";
 // Register all controller routes
 fastify.register(routes)
