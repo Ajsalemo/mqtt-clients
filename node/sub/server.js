@@ -7,7 +7,7 @@ const fastify = Fastify({
     logger: true
 })
 const MOSQUITTO_BROKER_URL = process.env.MQTT_BROKER_URL || "mqtt://localhost:1883";
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 3001;
 export const TOPIC = process.env.TOPIC || "test";
 
 const connectBroker = async () => {
