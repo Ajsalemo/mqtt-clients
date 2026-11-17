@@ -1,0 +1,23 @@
+services:
+  pubsub:
+    build: .
+    environment:
+    - MQTT_BROKER_URL=mqtt://mosquitto:1883
+    ports:
+      - "3000:3000"
+    networks:
+      - mqtt
+
+  mosquitto:
+    image: eclipse-mosquitto:2.1.2-alpine
+    ports:
+      - "1883:1883"
+    volumes:
+      - ../../mosquitto-broker-local/mosquitto/config:/mosquitto/config
+      - ../../mosquitto-broker-local/mosquitto/data:/mosquitto/data
+    networks:
+      - mqtt
+
+networks:
+  mqtt:
+    driver: bridge
