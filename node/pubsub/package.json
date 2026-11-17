@@ -1,7 +1,8 @@
 {
   "dependencies": {
     "fastify": "^5.12.7",
-    "mqtt": "^5.16.1"
+    "mqtt": "^5.16.1",
+    "uuid": "^14.0.3"
   },
   "type": "module"
 }
