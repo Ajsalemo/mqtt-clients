@@ -18,6 +18,8 @@ const connectBroker = async () => {
         const opts = {
             reconnectPeriod: 10000,
             reconnectOnConnackError: true,
+            clientId: "mqtt-node-sub",
+            clean: false
         }
         
         const client = await connectAsync(MOSQUITTO_BROKER_URL, opts);
