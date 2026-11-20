@@ -11,6 +11,8 @@ from sub.subscribe import subscribe_topic
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
+TOPC = "test"
+
 mqttc = mqtt.Client(
     CallbackAPIVersion.VERSION2, clean_session=False, client_id="mqtt-python-pubsub"
 )
@@ -46,8 +48,6 @@ async def lifespan(app: FastAPI):
 
 
 app = FastAPI(lifespan=lifespan)
-
-TOPC = "test"
 
 
 @app.get("/")
