@@ -52,7 +52,7 @@ app = FastAPI(lifespan=lifespan)
 
 @app.get("/")
 async def read_root():
-    return {"Hello": "World"}
+    return {"message": "mqtt-clients-python-pubsub"}
 
 
 @app.get("/api/publish")
