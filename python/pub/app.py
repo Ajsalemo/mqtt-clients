@@ -1,4 +1,3 @@
-import asyncio
 import logging
 import uuid
 from contextlib import asynccontextmanager
@@ -11,9 +10,9 @@ from pub.publish import publish_message
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 TOPC = "test"
-
+# Be careful to not use the same client ID as other clients. This will cause constant reconnects likel due to client id conflicts
 mqttc = mqtt.Client(
-    CallbackAPIVersion.VERSION2, clean_session=False, client_id="mqtt-python-pubsub"
+    CallbackAPIVersion.VERSION2, clean_session=False, client_id="mqtt-python-pub"
 )
 
 
